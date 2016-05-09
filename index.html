@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Photo sphere with three.js</title>
+	<style>
+		body {
+            padding:0;
+				margin:0;
+				overflow:hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+			
+        }
+		#container {
+			position: absolute;
+			  top: 0;
+			  left: 0;
+			  right: 0;
+			  bottom: 0;
+		}
+    </style>	
+</head>
+<body>
+	<div id="container"></div>
+	<div id="sphere"></div>
+	<script src="js/three.min.js"></script>
+	<script src="js/OrbitControls.js"></script>	
+	<script src="js/Detector.js"></script>
+	<script src="js/StereoEffect.js"></script>
+	<script src="js/DeviceOrientationControls.js"></script>
+	<script src="js/CardboardEffect.js"></script>	
+	<script type="text/javascript">
+	 var clock = new THREE.Clock();
+	 var container, scene, camera, renderer, controls, stats,cameraPosition,effect;
+function init() 
+{
+    scene = new THREE.Scene();
+	// RENDERER
+	renderer = new THREE.WebGLRenderer( { antialias: true } );
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	//renderer.setViewport( 0, 0, WW*DPR, HH*DPR );
+	renderer.gammaInput = true;
+	renderer.gammaOutput = true;
+	//renderer.setClearColor(0xaabbff,1);
+	element = renderer.domElement;
+	container = document.getElementById('container');
+	container.appendChild(element);
+    // CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 1, FAR = 10000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, window.innerWidth / window.innerHeight, 1, 10000);
+
+	effect = new THREE.StereoEffect(renderer);
+	effect.setSize( window.innerWidth, window.innerHeight );
+	// CONTROLS
+	controls = new THREE.OrbitControls(camera, element);
+	controls.noPan = true;
+	controls.noZoom = true; 
+	controls.target.set(
+    camera.position.x + 300,
+    camera.position.y + 5,
+    camera.position.z + 30
+	);
+
+	var sphere = new THREE.Mesh(
+		new THREE.SphereGeometry(2000, 600, 400),
+		new THREE.MeshBasicMaterial({
+			map: THREE.ImageUtils.loadTexture('app8.jpg')
+		})
+	);
+	sphere.scale.x = -1;
+	scene.add(sphere);
+		
+		function setOrientationControls(e) {
+	        if (!e.alpha) {
+	          return;
+	        }
+
+	        controls = new THREE.DeviceOrientationControls(camera, true);
+	        controls.connect();
+	        controls.update();
+
+	        element.addEventListener('click', fullscreen, false);
+
+	        window.removeEventListener('deviceorientation', setOrientationControls, true);
+	      }
+		window.addEventListener('deviceorientation', setOrientationControls, true);
+
+	     window.addEventListener('resize', resize, false);
+	    setTimeout(resize, 1);
+	
+	
+} //end of init
+
+function resize() {
+	      var width = container.offsetWidth;
+	      var height = container.offsetHeight;
+
+	      camera.aspect = width / height;
+	      camera.updateProjectionMatrix();
+
+	      renderer.setSize(width, height);
+	      effect.setSize(width, height);
+	    }
+
+	    function update(dt) {
+	      resize();
+
+	      camera.updateProjectionMatrix();
+
+	      controls.update(dt);
+	    }
+
+	    function render(dt) {
+	      effect.render(scene, camera);
+	    }
+
+	    function animate(t) {
+	      requestAnimationFrame(animate);
+
+	      update(clock.getDelta());
+	      render(clock.getDelta());
+	    }
+
+	    function fullscreen() {
+	      if (container.requestFullscreen) {
+	        container.requestFullscreen();
+	      } else if (container.msRequestFullscreen) {
+	        container.msRequestFullscreen();
+	      } else if (container.mozRequestFullScreen) {
+	        container.mozRequestFullScreen();
+	      } else if (container.webkitRequestFullscreen) {
+	        container.webkitRequestFullscreen();
+	      }
+	    }
+
+init();
+animate();
+	</script>
+</body>
+</html>
